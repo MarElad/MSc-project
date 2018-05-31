@@ -1,14 +1,15 @@
 
 # coding: utf-8
 
-# # Attempt Jan
+# # Version 3
 
-# In[2]:
+# In[101]:
 
 import numpy as nm
+import bisect
 
 
-# In[3]:
+# In[110]:
 
 import random
 
@@ -100,14 +101,29 @@ class Frame_generator(object):
         for i in range(n_frames):
             frames[i][:][:]=self.frame()
         return frames
-    
+
+# final image generator
+def final_image(dim):
+    n = nm.random.poisson(lam=40, size=1)
+    a = nm.random.rand(n[0],2)
+    intervals = nm.arange(0,1,1/dim)
+    loc1 = []
+    loc2 = []
+    for n in range(len(a)):
+        loc1.append(bisect.bisect_left(intervals, a[n][0])-1)
+        loc2.append(bisect.bisect_left(intervals, a[n][1])-1)
+    x = nm.zeros((dim,dim))
+    for i,j in zip(loc1,loc2):
+        x[i][j]=1
+    return(x)
+
+
 # images generator function
 def frames_data_fun(n_images, n_frames, dim):
     labels = nm.empty((n_images, dim, dim))
     data = nm.empty((n_images, n_frames, dim, dim))
     for n in range(n_images):
-        x = nm.random.poisson(lam=1, size=(dim,dim))
-        x = nm.minimum(x,1)
+        x = final_image(dim)
         tmp = Frame_generator(x, dim)
         frames = tmp.frames(n_frames=n_frames)
         labels[n][:][:]=x
@@ -116,7 +132,7 @@ def frames_data_fun(n_images, n_frames, dim):
 
 # call images generator function
 # 1000 images, 10000 frames, 100X100 dimension
-res = frames_data_fun(n_images=1000, n_frames=10000, dim=100)
+res = frames_data_fun(n_images=3, n_frames=8, dim=22)
 labels = res[0]
 data = res[1]
 

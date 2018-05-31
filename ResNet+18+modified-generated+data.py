@@ -37,7 +37,7 @@ labels = torch.from_numpy(nm.load('labels.npy'))
 # In[14]:
 
 # Hyper-parameters
-num_epochs = 40
+num_epochs = 80
 learning_rate = 0.001
 channel_dim = data.shape[1]
 input_dim=data.shape[2]
@@ -76,13 +76,13 @@ test_labels = labels[indices[1],:,:]
 
 # define mini-batch
 train_loader = torch.utils.data.DataLoader(dataset=train_loader,
-                                           batch_size=16,shuffle=False)
+                                           batch_size=8,shuffle=False)
 train_labels = torch.utils.data.DataLoader(dataset=train_labels,
-                                           batch_size=16,shuffle=False)
+                                           batch_size=8,shuffle=False)
 test_loader = torch.utils.data.DataLoader(dataset=test_loader,
-                                           batch_size=16,shuffle=False)
+                                           batch_size=8,shuffle=False)
 test_labels = torch.utils.data.DataLoader(dataset=test_labels,
-                                           batch_size=16,shuffle=False)
+                                           batch_size=8,shuffle=False)
 
 # datasets shapes
 #print(train_loader.shape)
@@ -241,7 +241,7 @@ with torch.no_grad():
         correct += (predicted == labels).sum().item()
         
     with open('out.txt', 'a') as f:
-       print('epoch:', num_epochs, ':', 'Accuracy of the model on the test images: {} %'.format(100 * correct / total), file=f)
+       print('images:', data_samples, 'channels:', data.shape[1], 'epoch:', num_epochs, ':', 'Accuracy of the model on the test images: {} %'.format(100 * correct / total), file=f)
         
 # Save the model checkpoint
 torch.save(model.state_dict(), 'resnet.ckpt')
