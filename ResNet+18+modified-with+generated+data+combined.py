@@ -5,19 +5,19 @@
 
 # ## Import packages
 
-# In[24]:
+# In[43]:
 
 import torch
 import torch.nn as nn
 import torchvision
 import torchvision.transforms as transforms
-import numpy as nm
+import numpy as np
 import bisect
 
 
 # ## Device configuration
 
-# In[25]:
+# In[44]:
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -27,142 +27,161 @@ print(torch.cuda.device_count())
 
 # ## Data generation
 
-# In[26]:
+# In[45]:
 
 import random
 
 #frames generator class
 class Frame_generator(object):
 
-    def __init__(self, array, dim, train_samples=4):
-        self.array = array
+    def __init__(self, dim, train_samples=4):
+#         self.array = array
         self.dim = dim
         self.train_samples = train_samples
-        self.zeros = nm.zeros((dim, dim))
-        self.itemindex = self.itemindex_fun
-        self.indices = self.datasets_indices
+        self.zeros = np.zeros((dim, dim))
+#         self.itemindex = self.itemindex_fun
+#         self.indices = self.datasets_indices
 #         self.frame = self.frame(x=array)
         
-    def itemindex_fun(self,value):
-        itemindex = nm.where(self.array==value)
-        return itemindex
+#     def itemindex_fun(self,value):
+#         itemindex = np.where(self.array==value)
+#         return itemindex
     
-    def datasets_indices(self, train_samples):
-        indices = nm.arange(len(self.itemindex(1)[0]))
-        one_indices =  random.sample(list(indices), train_samples)
-        return(one_indices)
+#     def datasets_indices(self, train_samples):
+#         indices = np.arange(len(self.itemindex(1)[0]))
+#         one_indices =  random.sample(list(indices), train_samples)
+#         return(one_indices)
 
     #using self.definitions for the functions didn't work out
     #forward part doesn't work
-    def frame(self):
-        y = self.itemindex(1)
-        z = self.indices(4)
-        res = self.zeros
-        res = res*1
-        for i in z:
-            res[y[0][i]][y[1][i]]=1
-            if (y[0][i])==0 and (y[1][i])==0:
-                res[y[0][i]][y[1][i]+1]=1
-                res[y[0][i]+1][y[1][i]]=1
-                res[y[0][i]+1][y[1][i]+1]=1
-            elif (y[0][i])==0 and (y[1][i])==self.dim-1:
-                res[y[0][i]][y[1][i]-1]=1
-                res[y[0][i]+1][y[1][i]-1]=1
-                res[y[0][i]+1][y[1][i]]=1
-            elif (y[0][i])==self.dim-1 and (y[1][i])==0:
-                res[y[0][i]-1][y[1][i]]=1
-                res[y[0][i]-1][y[1][i]+1]=1
-                res[y[0][i]][y[1][i]+1]=1
-            elif (y[0][i])==self.dim-1 and (y[1][i])==self.dim-1:
-                res[y[0][i]-1][y[1][i]]=1
-                res[y[0][i]-1][y[1][i]-1]=1
-                res[y[0][i]][y[1][i]-1]=1
-            elif (y[0][i])==0:
-                res[y[0][i]][y[1][i]-1]=1
-                res[y[0][i]][y[1][i]+1]=1
-                res[y[0][i]+1][y[1][i]-1]=1
-                res[y[0][i]+1][y[1][i]]=1
-                res[y[0][i]+1][y[1][i]+1]=1
-            elif (y[0][i])==self.dim-1:
-                res[y[0][i]][y[1][i]-1]=1
-                res[y[0][i]][y[1][i]+1]=1
-                res[y[0][i]-1][y[1][i]-1]=1
-                res[y[0][i]-1][y[1][i]]=1
-                res[y[0][i]-1][y[1][i]+1]=1
-            elif (y[1][i])==0:
-                res[y[0][i]-1][y[1][i]]=1
-                res[y[0][i]+1][y[1][i]]=1
-                res[y[0][i]-1][y[1][i]+1]=1
-                res[y[0][i]][y[1][i]+1]=1
-                res[y[0][i]+1][y[1][i]+1]=1
-            elif (y[1][i])==self.dim-1:
-                res[y[0][i]-1][y[1][i]]=1
-                res[y[0][i]+1][y[1][i]]=1
-                res[y[0][i]-1][y[1][i]-1]=1
-                res[y[0][i]][y[1][i]-1]=1
-                res[y[0][i]+1][y[1][i]-1]=1
+    def frame(self, loc1, loc2):
+        res = np.copy(self.zeros)
+        for i,j in zip(loc1,loc2):
+#             print('i:', i)
+#             print('j:', j)
+            res[i][j]+=1
+            if i==0 and j==0:
+                res[i][j+1]+=1
+                res[i+1][j]+=1
+                res[i+1][j+1]+=1
+            elif i==0 and j==self.dim-1:
+                res[i][j-1]+=1
+                res[i+1][j-1]+=1
+                res[i+1][j]+=1
+            elif i==self.dim-1 and j==0:
+                res[i-1][j]+=1
+                res[i-1][j+1]+=1
+                res[i][j+1]+=1
+            elif i==self.dim-1 and j==self.dim-1:
+                res[i-1][j]+=1
+                res[i-1][j-1]+=1
+                res[i][j-1]+=1
+            elif i==0:
+                res[i][j-1]+=1
+                res[i][j+1]+=1
+                res[i+1][j-1]+=1
+                res[i+1][j]+=1
+                res[i+1][j+1]+=1
+            elif i==self.dim-1:
+                res[i][j-1]+=1
+                res[i][j+1]+=1
+                res[i-1][j-1]+=1
+                res[i-1][j]+=1
+                res[i-1][j+1]+=1
+            elif j==0:
+                res[i-1][j]+=1
+                res[i+1][j]+=1
+                res[i-1][j+1]+=1
+                res[i][j+1]+=1
+                res[i+1][j+1]+=1
+            elif j==self.dim-1:
+                res[i-1][j]+=1
+                res[i+1][j]+=1
+                res[i-1][j-1]+=1
+                res[i][j-1]+=1
+                res[i+1][j-1]+=1
             else:
-                res[y[0][i]-1][y[1][i]-1]=1
-                res[y[0][i]-1][y[1][i]]=1
-                res[y[0][i]-1][y[1][i]+1]=1
-                res[y[0][i]][y[1][i]-1]=1
-                res[y[0][i]][y[1][i]+1]=1
-                res[y[0][i]+1][y[1][i]-1]=1
-                res[y[0][i]+1][y[1][i]]=1
-                res[y[0][i]+1][y[1][i]+1]=1
+                res[i-1][j-1]+=1
+                res[i-1][j]+=1
+                res[i-1][j+1]+=1
+                res[i][j-1]+=1
+                res[i][j+1]+=1
+                res[i+1][j-1]+=1
+                res[i+1][j]+=1
+                res[i+1][j+1]+=1
 
         return(res)
     
     #produce dataset
-    def frames(self, n_frames):
-        frames = nm.empty((n_frames, self.dim, self.dim))
+    def frames(self, n_frames, loc1, loc2):
+        frames = np.empty((n_frames, self.dim, self.dim))
         for i in range(n_frames):
-            frames[i][:][:]=self.frame()
+            loc1_tmp = loc1[loc1[:,i].nonzero()[0],i]
+            loc2_tmp = loc2[loc2[:,i].nonzero()[0],i]
+            intervals = np.arange(0,1,1/self.dim)
+            loc1_index = []
+            loc2_index = []
+#             print(loc1_tmp.shape)
+            for n in range(loc1_tmp.shape[0]):
+#                 print(loc1_tmp)
+                loc1_index.append(bisect.bisect_left(intervals, loc1_tmp[n])-1)
+                loc2_index.append(bisect.bisect_left(intervals, loc2_tmp[n])-1)
+            frames[i][:][:]=self.frame(loc1_index, loc2_index)
         return frames
 
 # final image generator
-def final_image(dim):
-    n = nm.random.poisson(lam=40, size=1)
-    a = nm.random.rand(n[0],2)
-    intervals = nm.arange(0,1,1/dim)
+def final_image(dim, n_frames):
+    n = np.random.poisson(lam=40, size=1)
+    loc_mat = np.random.rand(n[0],2)
+    intervals = np.arange(0,1,1/dim)
     loc1 = []
     loc2 = []
-    for n in range(len(a)):
-        loc1.append(bisect.bisect_left(intervals, a[n][0])-1)
-        loc2.append(bisect.bisect_left(intervals, a[n][1])-1)
-    x = nm.zeros((dim,dim))
+    for n in range(loc_mat.shape[0]):
+        loc1.append(bisect.bisect_left(intervals, loc_mat[n,0])-1)
+        loc2.append(bisect.bisect_left(intervals, loc_mat[n,1])-1)
+    x = np.zeros((dim,dim))
     for i,j in zip(loc1,loc2):
-        x[i][j]=1
-    return(x)
+        x[i][j] += 1
+    #generate location matrices
+#     print(loc_mat[:,0].shape)
+    binom = np.random.binomial(n=1,p=4/loc_mat.shape[0],size=(loc_mat.shape[0],n_frames))
+#     print(binom.shape)
+    loc1 = np.multiply(np.reshape(loc_mat[:,0],(loc_mat.shape[0],-1)),binom)
+    loc2 = np.multiply(np.reshape(loc_mat[:,1],(loc_mat.shape[0],-1)),binom)
+    loc1 = loc1[loc1[:,:].nonzero()[0],:]
+    loc2 = loc2[loc2[:,:].nonzero()[0],:]
+    return(x, loc1, loc2)
 
 
 # images generator function
 def frames_data_fun(n_images, n_frames, dim):
-    labels = nm.empty((n_images, dim, dim))
-    data = nm.empty((n_images, n_frames, dim, dim))
+    labels = np.empty((n_images, dim, dim))
+    data = np.empty((n_images, n_frames, dim, dim))
     for n in range(n_images):
-        x = final_image(dim)
-        tmp = Frame_generator(x, dim)
-        frames = tmp.frames(n_frames=n_frames)
+        x, loc1, loc2 = final_image(dim, n_frames)
+        tmp = Frame_generator(dim)
+        frames = tmp.frames(n_frames=n_frames, loc1=loc1, loc2=loc2)
         labels[n][:][:]=x
         data[n][:][:][:]=frames
     return(labels, data)
 
 # call images generator function
 # 1000 images, 10000 frames, 100X100 dimension
-res = frames_data_fun(n_images=1000, n_frames=10000, dim=100)
+res = frames_data_fun(n_images=60, n_frames=1000, dim=5)
 labels = res[0]
 data = res[1]
 
 print(data.shape)
+# print('data frame:', data[2,3,:,:])
+# print('lable:', labels[2,:,:])
 
 
 # ## Hyper parameters
 
-# In[ ]:
+# In[46]:
 
 # Hyper-parameters
-num_epochs = 60
+num_epochs = 40
 learning_rate = 0.001
 channel_dim = data.shape[1]
 input_dim=data.shape[2]
@@ -179,13 +198,13 @@ train_samples = round(0.8*data_samples)
 
 # ## Train and test datasets
 
-# In[ ]:
+# In[47]:
 
 import random
 
 # Data loader
 def datasets_indices(data_samples, train_samples):    
-    indices = nm.arange(data_samples)
+    indices = np.arange(data_samples)
     #print(indices)
     train_indices =  random.sample(list(indices), train_samples)
     #print(train_indices)
@@ -201,13 +220,13 @@ test_labels = labels[indices[1],:,:]
 
 # define mini-batch
 train_loader = torch.utils.data.DataLoader(dataset=train_loader,
-                                           batch_size=32,shuffle=False)
+                                           batch_size=16,shuffle=False)
 train_labels = torch.utils.data.DataLoader(dataset=train_labels,
-                                           batch_size=32,shuffle=False)
+                                           batch_size=16,shuffle=False)
 test_loader = torch.utils.data.DataLoader(dataset=test_loader,
-                                           batch_size=32,shuffle=False)
+                                           batch_size=16,shuffle=False)
 test_labels = torch.utils.data.DataLoader(dataset=test_labels,
-                                           batch_size=32,shuffle=False)
+                                           batch_size=16,shuffle=False)
 
 # datasets shapes
 #print(train_loader.shape)
@@ -217,13 +236,13 @@ test_labels = torch.utils.data.DataLoader(dataset=test_labels,
 # ## Define a model
 # ResNet 18 modified version (terminal fully connected layer is replaced with another convolution layer).
 
-# In[ ]:
+# In[48]:
 
 # 3x3 convolution
 
 def conv3x3(in_channels, out_channels, stride=1, input_dim=input_dim):
     return nn.Conv2d(in_channels, out_channels, kernel_size=3, 
-                     stride=stride, padding=nm.ceil((input_dim*stride-input_dim-stride+3)/2), bias=True)
+                     stride=stride, padding=np.ceil((input_dim*stride-input_dim-stride+3)/2), bias=True)
 
 # Residual block
 class ResidualBlock(nn.Module):
@@ -288,7 +307,9 @@ class ResNet(nn.Module):
         out = self.layer2(out)
         out = self.layer3(out)
         out = self.conv_final(out)
-        out = self.out_act(out)
+        #replace sigmoid by ReLu
+#         out = self.out_act(out)
+        out = self.relu(out)
         #print("net size:", out.shape)
         return out
 
@@ -298,7 +319,7 @@ class ResNet(nn.Module):
 #  - Train the model on the train data.
 #  - Test the model on the test data and report model accuracy.
 
-# In[ ]:
+# In[49]:
 
 # Check if multiple GPUs are available, and if so parallelize the computations
 model = ResNet(ResidualBlock, [2, 2, 2, 2]).double().to(device)
@@ -339,7 +360,7 @@ for epoch in range(num_epochs):
         optimizer.step()
         
         # print train run results
-        if (i+1) % 10 == 0:
+        if (i+1) % 1 == 0:
             print ("Epoch [{}/{}], Step [{}/{}] Loss: {:.4f}"
                    .format(epoch+1, num_epochs, i+1, total_step, loss.item()))
 
