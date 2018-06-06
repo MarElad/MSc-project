@@ -167,7 +167,7 @@ def frames_data_fun(n_images, n_frames, dim):
 
 # call images generator function
 # 1000 images, 10000 frames, 100X100 dimension
-res = frames_data_fun(n_images=60, n_frames=1000, dim=5)
+res = frames_data_fun(n_images=200, n_frames=10000, dim=50)
 labels = res[0]
 data = res[1]
 
@@ -181,7 +181,7 @@ print(data.shape)
 # In[46]:
 
 # Hyper-parameters
-num_epochs = 40
+num_epochs = 100
 learning_rate = 0.001
 channel_dim = data.shape[1]
 input_dim=data.shape[2]
@@ -220,13 +220,13 @@ test_labels = labels[indices[1],:,:]
 
 # define mini-batch
 train_loader = torch.utils.data.DataLoader(dataset=train_loader,
-                                           batch_size=16,shuffle=False)
+                                           batch_size=64,shuffle=False)
 train_labels = torch.utils.data.DataLoader(dataset=train_labels,
-                                           batch_size=16,shuffle=False)
+                                           batch_size=64,shuffle=False)
 test_loader = torch.utils.data.DataLoader(dataset=test_loader,
-                                           batch_size=16,shuffle=False)
+                                           batch_size=64,shuffle=False)
 test_labels = torch.utils.data.DataLoader(dataset=test_labels,
-                                           batch_size=16,shuffle=False)
+                                           batch_size=64,shuffle=False)
 
 # datasets shapes
 #print(train_loader.shape)
