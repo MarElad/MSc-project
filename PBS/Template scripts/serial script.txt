@@ -1,0 +1,26 @@
+#!/bin/bash
+#PBS -l walltime=24:00:00,select=1:ncpus=1:mem=4gb
+
+#lines above to start the script
+
+#number of script iterations needed
+
+#PBS-J 0-5
+
+#define parameters
+
+par1=("one" "two" "three")
+par2=("one" "two" "three")
+
+#copy files to node
+cp $PBS_0_WORKDIR/ResNet\ 18\ modified-with\ generated\ data\ combined.py script.py
+
+#run python script with parameters
+
+python script.py --par1 ${par1[PBS_ARRAY_INDEX]} --par2 ${par1[PBS_ARRAY_INDEX]} --out out.${PBS_ARRARY_INDEX}
+
+#copy back the results
+cp out.${PBS_ARRARY_INDEX} $PBS_0_WORKDIR
+
+
+

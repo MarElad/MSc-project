@@ -169,7 +169,7 @@ def frames_data_fun(n_images, n_frames, dim):
 
 # call images generator function
 # 1000 images, 10000 frames, 100X100 dimension
-res = frames_data_fun(n_images=80, n_frames=200, dim=10)
+res = frames_data_fun(n_images=1000, n_frames=10000, dim=10)
 labels = res[0]
 data = res[1]
 
@@ -183,7 +183,7 @@ print(data.shape)
 # In[279]:
 
 # Hyper-parameters
-num_epochs = 5000
+num_epochs = 100
 learning_rate = 0.001
 channel_dim = data.shape[1]
 input_dim=data.shape[2]
@@ -441,8 +441,8 @@ print('semi_correct:', semi_correct/total*100, '%')
 print('correct ones:', correct_ones/total_ones*100, '%')
 print('correct zeros:', correct_zeros/total_zeros*100, '%')
 
-# with open('out.txt', 'a') as f:
-#     print('####\n','images:', data_samples, 'channels:', data.shape[1], 'dim:', data.shape[2], 'epoch:', num_epochs, '\n', 'Accuracy of the model on the train images: {} %'.format(100 * correct / total), file=f)
+with open('out.txt', 'w') as f:
+	print('\n####\n','images:', data_samples, 'channels:', data.shape[1], 'dim:', data.shape[2], 'epoch:', num_epochs, '\n', 'Accuracy of the model on the train images: {} %'.format(100 * correct / total), file=f)
 
 # Test the model (test data)
 print('################')
@@ -480,26 +480,10 @@ print('semi_correct:', semi_correct/total*100, '%')
 print('correct ones:', correct_ones/total_ones*100, '%')
 print('correct zeros:', correct_zeros/total_zeros*100, '%')
 
-# with open('out.txt', 'a') as f:
-#     print('\n', 'Accuracy of the model on the test images: {} %'.format(100 * correct / total), file=f)
+with open('out.txt', 'a') as f:
+	print('\n', 'Accuracy of the model on the test images: {} %'.format(100 * correct / total), file=f)
         
 # Save the model checkpoint
 torch.save(model.state_dict(), 'resnet.ckpt')
-
-
-# In[ ]:
-
-print('labels:', labels[1,:,:])
-print('predicted:', predicted[1,:,:,:])
-
-
-# In[ ]:
-
-x = max(min(-1,10),0)
-print(x)
-
-
-# In[ ]:
-
 
 

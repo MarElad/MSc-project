@@ -1,0 +1,7 @@
+#concatanate files (separate scripts)
+cat file1 file2 file3 > final_file
+
+#python library to create arrays for parameters
+#docopt python - pass parameters to python script
+
+# scp: command to copy files to/from the cluster

@@ -1,0 +1,16 @@
+#!/bin/bash
+#PBS -l walltime=24:00:00,select=1:ncpus=1:mem=4gb:ngpus=1
+module load anaconda3/personal
+
+# above are the intial commands to start every script with. last input in the second line is the number of the GPUs.
+
+#copy files to node
+cp $PBS_0_WORKDIR/ResNet\ 18\ modified-with\ generated\ data\ combined.py script.py
+
+#run the script
+python script.py
+
+#copy back the results
+cp out.txt $PBS_0_WORKDIR
+
+#run a script: qsub <name of script>
