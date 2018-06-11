@@ -357,8 +357,7 @@ class Loss(torch.nn.Module):
                 for j in range(x.shape[3]):
                     if y[image,0,i,j]==1:
                         loss_layer1+=abs(y[image,1,i,j]-x[image,1,i,j])/(x.shape[2]^2)
-        totloss = loss_layer0
-#         +loss_layer1
+        totloss = loss_layer0+loss_layer1
         return totloss
 
 # Loss and optimizer
@@ -442,7 +441,7 @@ print('correct ones:', correct_ones/total_ones*100, '%')
 print('correct zeros:', correct_zeros/total_zeros*100, '%')
 
 with open('out.txt', 'w') as f:
-	print('\n####\n','images:', data_samples, 'channels:', data.shape[1], 'dim:', data.shape[2], 'epoch:', num_epochs, '\n', 'Accuracy of the model on the train images: {} %'.format(100 * correct / total), file=f)
+	print('\n####\n','two layers loss\n', 'images:', data_samples, 'channels:', data.shape[1], 'dim:', data.shape[2], 'epoch:', num_epochs, '\n', 'Accuracy of the model on the train images: {} %'.format(100 * correct / total), file=f)
 
 # Test the model (test data)
 print('################')
