@@ -17,7 +17,7 @@ cp $HOME/ResNet18.py ResNet18.py
 
 #run python script with parameters
 
-python ResNet18.py.py --par1 ${par1[PBS_ARRAY_INDEX]} --par2 ${par1[PBS_ARRAY_INDEX]} --out out.${PBS_ARRARY_INDEX}
+python ResNet18.py --par1 ${par1[PBS_ARRAY_INDEX]} --par2 ${par1[PBS_ARRAY_INDEX]} --out out.${PBS_ARRARY_INDEX}
 
 #copy back the results
 cp out.${PBS_ARRARY_INDEX} $HOME

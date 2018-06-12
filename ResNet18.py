@@ -5,7 +5,7 @@
 
 # ## Import packages
 
-# In[276]:
+# In[71]:
 
 import torch
 import torch.nn as nn
@@ -17,7 +17,7 @@ import bisect
 
 # ## Device configuration
 
-# In[277]:
+# In[72]:
 
 # Device configuration
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -27,7 +27,7 @@ print(torch.cuda.device_count())
 
 # ## Data generation
 
-# In[278]:
+# In[73]:
 
 import random
 
@@ -180,7 +180,7 @@ print(data.shape)
 
 # ## Hyper parameters
 
-# In[279]:
+# In[74]:
 
 # Hyper-parameters
 num_epochs = 100
@@ -189,6 +189,8 @@ channel_dim = data.shape[1]
 input_dim=data.shape[2]
 data_samples = len(data)
 train_samples = round(0.8*data_samples)
+#number of layers
+conv_layers0 = 32
 
 # # Image preprocessing modules
 # transform = transforms.Compose([
@@ -200,7 +202,7 @@ train_samples = round(0.8*data_samples)
 
 # ## Train and test datasets
 
-# In[280]:
+# In[75]:
 
 import random
 
@@ -222,13 +224,13 @@ test_labels = labels[indices[1],:,:]
 
 # define mini-batch
 train_loader = torch.utils.data.DataLoader(dataset=train_loader,
-                                           batch_size=32,shuffle=False)
+                                           batch_size=64,shuffle=False)
 train_labels = torch.utils.data.DataLoader(dataset=train_labels,
-                                           batch_size=32,shuffle=False)
+                                           batch_size=64,shuffle=False)
 test_loader = torch.utils.data.DataLoader(dataset=test_loader,
-                                           batch_size=32,shuffle=False)
+                                           batch_size=64,shuffle=False)
 test_labels = torch.utils.data.DataLoader(dataset=test_labels,
-                                           batch_size=32,shuffle=False)
+                                           batch_size=64,shuffle=False)
 
 # datasets shapes
 #print(train_loader.shape)
@@ -238,7 +240,7 @@ test_labels = torch.utils.data.DataLoader(dataset=test_labels,
 # ## Define a model
 # ResNet 18 modified version (terminal fully connected layer is replaced with another convolution layer).
 
-# In[ ]:
+# In[76]:
 
 epsilon = 10**(-4)
 
@@ -279,14 +281,14 @@ class ResidualBlock(nn.Module):
 class ResNet(nn.Module):
     def __init__(self, block, layers, num_classes=10):
         super(ResNet, self).__init__()
-        self.in_channels = 50
-        self.conv = conv3x3(channel_dim, 50)
-        self.bn = nn.BatchNorm2d(50)
+        self.in_channels = conv_layers0
+        self.conv = conv3x3(channel_dim, conv_layers0)
+        self.bn = nn.BatchNorm2d(conv_layers0)
         self.relu = nn.ReLU(inplace=True)
-        self.layer1 = self.make_layer(block, 100, layers[0])
-        self.layer2 = self.make_layer(block, 200, layers[0], 2)
-        self.layer3 = self.make_layer(block, 400, layers[1], 2)
-        self.conv_final = nn.Conv2d(400, 2, kernel_size=1, 
+        self.layer1 = self.make_layer(block, conv_layers0, layers[0])
+        self.layer2 = self.make_layer(block, conv_layers0*2, layers[0], 2)
+        self.layer3 = self.make_layer(block, conv_layers0*4, layers[1], 2)
+        self.conv_final = nn.Conv2d(conv_layers0*4, 2, kernel_size=1, 
                      stride=1, padding=0, bias=True)
         self.out_act = nn.Sigmoid()
         
@@ -328,7 +330,7 @@ class ResNet(nn.Module):
 #  - Train the model on the train data.
 #  - Test the model on the test data and report model accuracy.
 
-# In[ ]:
+# In[77]:
 
 # epsilon = 10**(-6)
 
@@ -406,6 +408,8 @@ for epoch in range(num_epochs):
 
 # Test the model (train data)
 print('################')
+print('convolution layers:({},{},{})'.format(conv_layers0, conv_layers0*2, conv_layers0*4))
+print('################')
 print('train data results')
 model.eval()
 with torch.no_grad():
@@ -441,7 +445,7 @@ print('correct ones:', correct_ones/total_ones*100, '%')
 print('correct zeros:', correct_zeros/total_zeros*100, '%')
 
 with open('out.txt', 'w') as f:
-	print('\n####\n','two layers loss\n', 'images:', data_samples, 'channels:', data.shape[1], 'dim:', data.shape[2], 'epoch:', num_epochs, '\n', 'Accuracy of the model on the train images: {} %'.format(100 * correct / total), file=f)
+    print('\n####\n','convolution layers:({},{},{}), '.format(conv_layers0, conv_layers0*2, conv_layers0*4),'\n','images:', data_samples, ', channels:', data.shape[1], ', dim:', data.shape[2], ', epoch:', num_epochs, '\n', 'Accuracy of the model on the train images: {} %'.format(100 * correct / total), file=f, sep='')
 
 # Test the model (test data)
 print('################')
@@ -480,9 +484,10 @@ print('correct ones:', correct_ones/total_ones*100, '%')
 print('correct zeros:', correct_zeros/total_zeros*100, '%')
 
 with open('out.txt', 'a') as f:
-	print('\n', 'Accuracy of the model on the test images: {} %'.format(100 * correct / total), file=f)
+    print('\n', 'Accuracy of the model on the test images: {} %'.format(100 * correct / total), file=f, sep='')
         
 # Save the model checkpoint
 torch.save(model.state_dict(), 'resnet.ckpt')
+
 
 
