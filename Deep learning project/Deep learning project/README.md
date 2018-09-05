@@ -13,9 +13,9 @@ ResNet18_temporally_uncorrelated_data.ipynb: Residual Network model with 18 laye
 ResNet18_temporally_correlated_data.ipynb: Residual Network model with 18 layers. Temporally correlated frames' data is included in the code.
 ResNet18_conv3D.ipynb: Residual Network model with 18 3D convolutional layers . Temporally correlated frames' data is included in the code.
 Spatial_Renet18_LSTM.py: Residual Network model with 18 2D convolutional layers followed by a LSTM network. Temporally correlated frames' data is included in the code.
+Scattered_photons_80UC.py: Residual Network model with 18 layers with simulation for scattering of the photons. Please contact Ms. Patel at lekha.patel11@imperial.ac.uk for the Matlab data simulation code.
 
 
 ## Acknowledgments
 
 * Thanks to Y. Choi for providing the building blocks for the code: https://github.com/yunjey/pytorch-tutorial.
-
